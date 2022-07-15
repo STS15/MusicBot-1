@@ -22,7 +22,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.AdminCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
-import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 
 /**
  *
@@ -62,7 +62,7 @@ public class SetvcCmd extends AdminCommand
             else
             {
                 s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" Music can now only be played in **"+list.get(0).getName()+"**");
+                event.reply(event.getClient().getSuccess()+" Music can now only be played in "+list.get(0).getAsMention());
             }
         }
     }

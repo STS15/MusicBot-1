@@ -20,8 +20,8 @@ import com.jagrosh.jlyrics.LyricsClient;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 
 /**
  *
@@ -36,21 +36,29 @@ public class LyricsCmd extends MusicCommand
         super(bot);
         this.name = "lyrics";
         this.arguments = "[song name]";
-        this.help = "shows the lyrics to the currently-playing song";
+        this.help = "shows the lyrics of a song";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.bePlaying = true;
     }
 
     @Override
     public void doCommand(CommandEvent event)
     {
-        event.getChannel().sendTyping().queue();
         String title;
         if(event.getArgs().isEmpty())
-            title = ((AudioHandler)event.getGuild().getAudioManager().getSendingHandler()).getPlayer().getPlayingTrack().getInfo().title;
+        {
+            AudioHandler sendingHandler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+            if (sendingHandler.isMusicPlaying(event.getJDA()))
+                title = sendingHandler.getPlayer().getPlayingTrack().getInfo().title;
+            else
+            {
+                event.replyError("There must be music playing to use that!");
+                return;
+            }
+        }
         else
             title = event.getArgs();
+        event.getChannel().sendTyping().queue();
         client.getLyrics(title).thenAccept(lyrics -> 
         {
             if(lyrics == null)

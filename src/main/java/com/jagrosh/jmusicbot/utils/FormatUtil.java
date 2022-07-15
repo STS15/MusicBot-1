@@ -16,9 +16,9 @@
 package com.jagrosh.jmusicbot.utils;
 
 import java.util.List;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 
 /**
  *
@@ -74,7 +74,7 @@ public class FormatUtil {
     {
         String out = " Multiple voice channels found matching \""+query+"\":";
         for(int i=0; i<6 && i<list.size(); i++)
-            out+="\n - "+list.get(i).getName()+" (ID:"+list.get(i).getId()+")";
+            out+="\n - "+list.get(i).getAsMention()+" (ID:"+list.get(i).getId()+")";
         if(list.size()>6)
             out+="\n**And "+(list.size()-6)+" more...**";
         return out;

@@ -23,8 +23,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,17 +52,17 @@ public class OtherUtil
      */
     public static Path getPath(String path)
     {
+        Path result = Paths.get(path);
         // special logic to prevent trying to access system32
-        if(path.toLowerCase().startsWith(WINDOWS_INVALID_PATH))
+        if(result.toAbsolutePath().toString().toLowerCase().startsWith(WINDOWS_INVALID_PATH))
         {
-            String filename = path.substring(WINDOWS_INVALID_PATH.length());
             try
             {
-                path = new File(JMusicBot.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + File.separator + filename;
+                result = Paths.get(new File(JMusicBot.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + File.separator + path);
             }
             catch(URISyntaxException ex) {}
         }
-        return Paths.get(path);
+        return result;
     }
     
     /**
@@ -113,28 +113,28 @@ public class OtherUtil
      * @param game the game, including the action such as 'playing' or 'watching'
      * @return the parsed activity
      */
-    public static Game parseGame(String game)
+    public static Activity parseGame(String game)
     {
         if(game==null || game.trim().isEmpty() || game.trim().equalsIgnoreCase("default"))
             return null;
         String lower = game.toLowerCase();
         if(lower.startsWith("playing"))
-            return Game.playing(makeNonEmpty(game.substring(7).trim()));
+            return Activity.playing(makeNonEmpty(game.substring(7).trim()));
         if(lower.startsWith("listening to"))
-            return Game.listening(makeNonEmpty(game.substring(12).trim()));
+            return Activity.listening(makeNonEmpty(game.substring(12).trim()));
         if(lower.startsWith("listening"))
-            return Game.listening(makeNonEmpty(game.substring(9).trim()));
+            return Activity.listening(makeNonEmpty(game.substring(9).trim()));
         if(lower.startsWith("watching"))
-            return Game.watching(makeNonEmpty(game.substring(8).trim()));
+            return Activity.watching(makeNonEmpty(game.substring(8).trim()));
         if(lower.startsWith("streaming"))
         {
             String[] parts = game.substring(9).trim().split("\\s+", 2);
             if(parts.length == 2)
             {
-                return Game.streaming(makeNonEmpty(parts[1]), "https://twitch.tv/"+parts[0]);
+                return Activity.streaming(makeNonEmpty(parts[1]), "https://twitch.tv/"+parts[0]);
             }
         }
-        return Game.playing(game);
+        return Activity.playing(game);
     }
    
     public static String makeNonEmpty(String str)
@@ -150,7 +150,14 @@ public class OtherUtil
         return st == null ? OnlineStatus.ONLINE : st;
     }
     
-    public static String checkVersion(Prompt prompt)
+    public static void checkJavaVersion(Prompt prompt)
+    {
+        if(!System.getProperty("java.vm.name").contains("64"))
+            prompt.alert(Prompt.Level.WARNING, "Java Version", 
+                    "It appears that you may not be using a supported Java version. Please use 64-bit java.");
+    }
+    
+    public static void checkVersion(Prompt prompt)
     {
         // Get current version number
         String version = getCurrentVersion();
@@ -160,11 +167,8 @@ public class OtherUtil
         
         if(latestVersion!=null && !latestVersion.equals(version))
         {
-            prompt.alert(Prompt.Level.WARNING, "Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
+            prompt.alert(Prompt.Level.WARNING, "JMusicBot Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
         }
-        
-        // Return the current version
-        return version;
     }
     
     public static String getCurrentVersion()

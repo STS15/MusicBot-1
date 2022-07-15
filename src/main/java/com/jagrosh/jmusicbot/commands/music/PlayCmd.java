@@ -31,9 +31,9 @@ import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import java.util.concurrent.TimeUnit;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.exceptions.PermissionException;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 
 /**
  *
@@ -173,7 +173,12 @@ public class PlayCmd extends MusicCommand
             else
             {
                 int count = loadPlaylist(playlist, null);
-                if(count==0)
+                if(playlist.getTracks().size() == 0)
+                {
+                    m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" The playlist "+(playlist.getName()==null ? "" : "(**"+playlist.getName()
+                            +"**) ")+" could not be loaded or contained 0 entries")).queue();
+                }
+                else if(count==0)
                 {
                     m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" All entries in this playlist "+(playlist.getName()==null ? "" : "(**"+playlist.getName()
                             +"**) ")+"were longer than the allowed maximum (`"+bot.getConfig().getMaxTime()+"`)")).queue();
